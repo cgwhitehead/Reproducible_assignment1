@@ -130,9 +130,20 @@ activity$day<-factor((weekdays(activity$date) %in% Myweekdays), levels=c(FALSE, 
 ```
 
 2. Make a panel plot
-```{r latticecharts}
+```{r latticecharts, warning=FALSE}
 library(lattice)
 ## Create the graph
-xyplot(steps ~ interval | day, activity, type='l', layout=c(1,2), ylab="number of steps", main="Activity per Interval Comparison")
+by_day_factor<-split(activity, activity$day)
+group_factor<-group_by(by_day_factor$Weekend, interval)
+group_factor2<-group_by(by_day_factor$Weekday, interval)
+weekendTrend<-summarize_each(group_factor, funs(mean(.)))
+weekdayTrend<-summarize_each(group_factor2, funs(mean(.)))
+weekdayTrend$date<-NULL
+weekdayTrend$day<-"weekday"
+weekendTrend$date<-NULL
+weekendTrend$day<-"weekend"
+WeekFactorAvg<-rbind(weekdayTrend, weekendTrend)
+WeekFactorAvg$day<-as.factor(WeekFactorAvg$day)
+xyplot(steps ~ interval | day, WeekFactorAvg, type='l', layout=c(1,2), ylab="number of steps", main="Activity per Interval Comparison")
 ```
 
